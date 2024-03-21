@@ -1,0 +1,184 @@
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+//Echo por Daniel Efrain Perez Gutierrez 4IA
+public class Calculadora extends Application {
+
+    private String entrada = ""; 
+    private double resultadoA = 0; //resultado Actual
+    private double resultadoP = 0; //resultado previo
+    private char operador = ' '; 
+    private boolean nvOperacion = true; // Nueva Operacion
+    private Label pantalla; 
+
+    @Override
+    public void start(Stage primaryStage) {
+
+        primaryStage.setTitle("JavaFX Calculadora");
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(5);
+        grid.setHgap(5);
+
+        pantalla = new Label("");
+        GridPane.setColumnSpan(pantalla, 4);
+        grid.add(pantalla, 0, 0);
+
+        Button[] botonesNumeros = new Button[10];
+        for (int i = 0; i < 10; i++) {
+            final int digito = i;
+            botonesNumeros[i] = new Button(Integer.toString(i));
+            botonesNumeros[i].setOnAction(e -> agregarAEntrada(Integer.toString(digito)));
+        }
+
+        Button botonSumar = new Button("+");
+        botonSumar.setOnAction(e -> establecerOperador('+'));
+        Button botonRestar = new Button("-");
+        botonRestar.setOnAction(e -> establecerOperador('-'));
+        Button botonMultiplicar = new Button("*");
+        botonMultiplicar.setOnAction(e -> establecerOperador('*'));
+        Button botonDividir = new Button("/");
+        botonDividir.setOnAction(e -> establecerOperador('/'));
+        Button botonIgual = new Button("=");
+        botonIgual.setOnAction(e -> evaluar());
+        Button botonNegar = new Button("+/-");
+        botonNegar.setOnAction(e -> negar());
+        Button botonPunto = new Button(".");
+        botonPunto.setOnAction(e -> PuntoDecimal());
+        Button botonRaiz = new Button("√");
+        botonRaiz.setOnAction(e -> raizCuadrada());
+        Button botonPotencia = new Button("^");
+        botonPotencia.setOnAction(e -> establecerOperador('^'));
+        Button botonLimpiar = new Button("C");
+        botonLimpiar.setOnAction(e -> limpiarT());
+
+        grid.add(botonLimpiar, 0, 1);
+        grid.add(botonNegar, 1, 1);
+        grid.add(botonRaiz, 2, 1);
+        grid.add(botonDividir, 3, 1);
+        grid.add(botonesNumeros[7], 0, 2);
+        grid.add(botonesNumeros[8], 1, 2);
+        grid.add(botonesNumeros[9], 2, 2);
+        grid.add(botonMultiplicar, 3, 2);
+        grid.add(botonesNumeros[4], 0, 3);
+        grid.add(botonesNumeros[5], 1, 3);
+        grid.add(botonesNumeros[6], 2, 3);
+        grid.add(botonRestar, 3, 3);
+        grid.add(botonesNumeros[1], 0, 4);
+        grid.add(botonesNumeros[2], 1, 4);
+        grid.add(botonesNumeros[3], 2, 4);
+        grid.add(botonSumar, 3, 4);
+        grid.add(botonesNumeros[0], 0, 5);
+        grid.add(botonPunto, 1, 5);
+        grid.add(botonPotencia, 2, 5);
+        grid.add(botonIgual, 3, 5);
+
+        Scene scene = new Scene(grid, 250, 250);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void agregarAEntrada(String valor) {
+        if (nvOperacion) {
+            entrada = "";
+            nvOperacion = false;
+        }
+        entrada += valor;
+        pantalla.setText(entrada);
+    }
+
+    private void establecerOperador(char op) {
+        if (!entrada.isEmpty()) {
+            if (!nvOperacion) {
+                evaluar();
+            }
+            operador = op;
+            nvOperacion = true;
+        }
+    }
+
+    private void evaluar() {
+        if (!entrada.isEmpty()) {
+            double segundoOperando = Double.parseDouble(entrada);
+            switch (operador) {
+                case '+':
+                    resultadoA += segundoOperando;
+                    break;
+                case '-':
+                    resultadoA -= segundoOperando;
+                    break;
+                case '*':
+                    resultadoA *= segundoOperando;
+                    break;
+                case '/':
+                    if (segundoOperando != 0) {
+                        resultadoA /= segundoOperando;
+                    } else {
+                        pantalla.setText("Error: División por cero");
+                        return;
+                    }
+                    break;
+                case '^':
+                    resultadoA = Math.pow(resultadoA, segundoOperando);
+                    break;
+                default:
+                    resultadoA = segundoOperando;
+            }
+            pantalla.setText(Double.toString(resultadoA));
+            entrada = "";
+        }
+    }
+
+    private void negar() {
+        if (!entrada.isEmpty()) {
+            double numero = Double.parseDouble(entrada);
+            numero = -numero;
+            entrada = Double.toString(numero);
+            pantalla.setText(entrada);
+        } else {
+            resultadoA = -resultadoA;
+            pantalla.setText(Double.toString(resultadoA));
+        }
+    }
+
+    private void PuntoDecimal() {
+        if (!entrada.contains(".")) {
+            entrada += ".";
+            pantalla.setText(entrada);
+        }
+    }
+
+    private void raizCuadrada() {
+        double numero;
+        if (!entrada.isEmpty()) {
+            numero = Double.parseDouble(entrada);
+            if (numero >= 0) {
+                resultadoA = Math.sqrt(numero);
+                pantalla.setText(Double.toString(resultadoA));
+                entrada = Double.toString(resultadoA);
+            } else {
+                pantalla.setText("Error: No se puede calcular la raíz cuadrada de un número negativo");
+            }
+        } else {
+            numero = resultadoA >= 0 ? resultadoA : 0;
+            resultadoA = Math.sqrt(numero);
+            pantalla.setText(Double.toString(resultadoA));
+        }
+    }
+
+    private void limpiarT() {
+        entrada = "";
+        resultadoA = 0;
+        pantalla.setText("");
+    }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+}
